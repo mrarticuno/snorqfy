@@ -1,0 +1,26 @@
+{
+  "name": "snorqfy",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1",
+    "pouchdb": "^7.1.1",
+    "pouchdb-adapter-node-websql": "^7.0.0",
+    "pouchdb-find": "^7.1.1",
+    "pouchdb-node": "^7.1.1",
+    "uuid": "^3.3.3",
+    "you-lister": "^2.0.0",
+    "youtube-crawler": "0.0.3"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.1"
+  }
+}
