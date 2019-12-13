@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon server.js"
+    "start": "pm2 start server.js --watch --ignore-watch='node_modules' -i max",
+    "startd": "pm2 start server.js --watch --ignore-watch='node_modules' -i max && pm2 plus",
+    "startm": "pm2 start server.js --watch --ignore-watch='node_modules' -i max && pm2 monit",
+    "stop": "pm2 stop all"
   },
   "keywords": [],
   "author": "",
@@ -12,6 +15,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
+    "pm2": "^4.2.0",
     "pouchdb": "^7.1.1",
     "pouchdb-adapter-node-websql": "^7.0.0",
     "pouchdb-find": "^7.1.1",

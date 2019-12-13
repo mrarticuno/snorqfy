@@ -6,11 +6,6 @@ let SongException = require('../models/exceptions/songException');
 const downloadController = require('../controllers/downloadController');
 
 exports.index = async function(req, res) {
-    // console.log(await new Song().all())
-    // response.forEach(song => {
-    //     let aux = new Song(song);
-    //     aux.delete();
-    // })
     downloadController.start_queue();
     
     res.status(200).json('Started');
