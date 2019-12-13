@@ -11,16 +11,14 @@ exports.index = function(req, res) {
 
 /**
  * start_queue: Start the main function to download the songs on the queue
- * 
  */
 exports.start_queue = async function(req, res) {
-    let queue = await new Song().find({
+    QUEUE = await new Song().find({
         selector: {
-            'downloaded': { $eq: false }
-          }
+            'downloaded': {$eq: false}
+        }
     });
-    QUEUE = queue;
-    module.exports.process_queue();
+    await module.exports.process_queue();
 };
 
 /**
@@ -29,11 +27,11 @@ exports.start_queue = async function(req, res) {
 exports.process_queue = async function() {
     if (QUEUE.length > 0) {
         let element = QUEUE.pop();
-        console.log(`Proccessing element #${QUEUE.length} - ${element.title}`)
+        console.log(`Processing element #${QUEUE.length} - ${element.title}`)
         await module.exports.download_song(element.url, element.code);
         element.downloaded = true;
         // new Song(element).save();
-        module.exports.process_queue();
+        await module.exports.process_queue();
     }
 };
 
@@ -56,34 +54,4 @@ exports.download_song = async function(link, output) {
         return false;
     }
     return true;
-};
-
-// Display book create form on GET.
-exports.book_create_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book create GET');
-};
-
-// Handle book create on POST.
-exports.book_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book create POST');
-};
-
-// Display book delete form on GET.
-exports.book_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book delete GET');
-};
-
-// Handle book delete on POST.
-exports.book_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book delete POST');
-};
-
-// Display book update form on GET.
-exports.book_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update GET');
-};
-
-// Handle book update on POST.
-exports.book_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update POST');
 };

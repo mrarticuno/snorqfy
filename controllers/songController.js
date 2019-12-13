@@ -11,11 +11,15 @@ exports.index = async function(req, res) {
     res.status(200).json('Started');
 };
 
-
+/**
+ * listFiles: list all the files available in the music folder
+ * @param req
+ * @param res
+ * @returns {Promise<string[]>}
+ */
 exports.listFiles = async function(req, res) {
     const readdir = util.promisify(fs.readdir);
-    let files = await readdir('./musics/');
-    return files;
+    return await readdir('./musics/');
 };
 
 /**
@@ -40,7 +44,21 @@ exports.search = async function(req, res) {
  * Look file in the filesystem
  */
 exports.searchFile = async function(req, res) {
+    let { name, id } = req.body;
     const files = await listFiles();
+
+    if (id) {
+        return files.includes(id);
+    } else  if(!id && name) {
+        let result = await new Song().find({
+            selector: {
+                'title': { $regex: RegExp(name, "i") }
+            }
+        });
+        return result.length > 0;
+    } else {
+        throw new Error('Invalid parameters');
+    }
 };
 
 /**
@@ -64,7 +82,7 @@ exports.request = async function(req, res) {
             });
     
             if (checkMatchInDB && checkMatchInDB.length > 0) {
-                res.send(`Song ${name} is already downloaded.`);
+                res.send(`Song ${name} is already in the Database.`);
                 return;
             }
         }
@@ -86,7 +104,7 @@ exports.request = async function(req, res) {
                 result = result[0];
             }
         } else {
-            throw new SongException('Index not found. SE-1')
+            throw new SongException('Index not found. SE-1');
         }
 
         let checkMusicInDB = await new Song().find({
@@ -96,14 +114,13 @@ exports.request = async function(req, res) {
         });
 
         if (checkMusicInDB && checkMusicInDB.length > 0) {
-            res.send(`Song ${result.title} is already downloaded.`);
+            res.send(`Song ${result.title} is already in the Database.`);
         } else {
-            // save in the DB
             await new Song({
                 url: result.link,
                 title: result.title
-            }).save()
-            downloadController()
+            }).save();
+            downloadController();
             res.send(`Song ${result.title} added to the download queue.`);
         }
     } catch (exp) {
