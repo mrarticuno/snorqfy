@@ -9,6 +9,7 @@ class Song extends BaseDao {
     this.id = (dados._id || '')
     this.code = (dados.code || '')
     this.downloaded = (dados.downloaded || false)
+    this.liked = (dados.liked || false)
     this.title = (dados.title || '')
     this.url = (dados.url || '')
 

@@ -1,43 +1,62 @@
-exports.index = function(req, res) {
-    res.send('NOT IMPLEMENTED: Site Home Page');
+const { Youtube, Spotify } = require('you-lister');
+const songController = require('../controllers/songController');
+const downloadController = require('../controllers/downloadController');
+const Playlist = require('../models/playlist');
+const Song = require('../models/song');
+
+/**
+ * request
+ * put playlist in the song queue
+ */
+exports.index = async function(req, res) {
+    let playlist = await new Playlist().all();
+    let song = await new Song().all();
+    res.status(202).json({
+        playlist, song
+    });
 };
 
-// Display list of all books.
-exports.book_list = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book list');
-};
+/**
+ * request
+ * put playlist in the song queue
+ */
+exports.request = async function(req, res) {
+    let { link, spotify } = req.body;
+    let scrappedPlaylist = [];
+    if (!spotify) {
+        let youtube = new Youtube({
+            url: link,
+            fast: true
+        });
+        scrappedPlaylist = await youtube.scrap();
+    } else {
+        let spotify = new Spotify({
+            url: link
+        });
+        scrappedPlaylist = await spotify.scrap();
+    }
+    const playlist = new Playlist({
+        url: link
+    });
+    if (scrappedPlaylist.length > 0) {
+        scrappedPlaylist = scrappedPlaylist.filter(x => !x.name.includes('Deleted video') || !x.name.includes('Private video'))
+        const promises = scrappedPlaylist.map(async (item, idx) => {
+            playlist.songs.push(item.id);
+            try {
+                await songController.songRequest({
+                    name: item.name
+                }, res);
+            } catch(ex) {
+                console.log(ex);
+                console.error(`Failed to request song: ${item.name}`)
+            }
+        });
 
-// Display detail page for a specific book.
-exports.book_detail = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book detail: ' + req.params.id);
-};
-
-// Display book create form on GET.
-exports.book_create_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book create GET');
-};
-
-// Handle book create on POST.
-exports.book_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book create POST');
-};
-
-// Display book delete form on GET.
-exports.book_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book delete GET');
-};
-
-// Handle book delete on POST.
-exports.book_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book delete POST');
-};
-
-// Display book update form on GET.
-exports.book_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update GET');
-};
-
-// Handle book update on POST.
-exports.book_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update POST');
+        await Promise.all(promises);
+        await playlist.save();
+    } else {
+        throw new Error('Failed to scrap videos from the playlist.');
+    }
+    downloadController.start_queue();
+    res.status(202).json('Playlist requested.');
 };

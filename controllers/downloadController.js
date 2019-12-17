@@ -40,18 +40,11 @@ exports.process_queue = async function() {
  */
 exports.download_song = async function(link, output) {
     const command = util.promisify(exec);
+    console.log(link, output);
     try {
-        if (fs.existsSync(output)) {
-          return true;
-        }
-      } catch(err) {
-      }
-    try {
-        await command(`ytdl ${link} | ffmpeg -i pipe:0 -b:a 192K -vn "${output}.mp3"`);
+        await command(`ytdl ${link} | ffmpeg -i pipe:0 -b:a 192K -vn "musics/${output}.mp3"`);
     } catch (e) {
         console.log(`Error during download of ${output}`);
         console.log(e);
-        return false;
     }
-    return true;
 };
