@@ -30,7 +30,7 @@ exports.process_queue = async function() {
         console.log(`Processing element #${QUEUE.length} - ${element.title}`)
         await module.exports.download_song(element.url, element.code);
         element.downloaded = true;
-        // new Song(element).save();
+        new Song(element).save();
         await module.exports.process_queue();
     }
 };

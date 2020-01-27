@@ -5,7 +5,6 @@ const PouchDB = require('pouchdb-node')
 PouchDB.plugin(require('pouchdb-find'))
 PouchDB.plugin(require('pouchdb-adapter-node-websql'))
 
-
 let BaseDao
 
 const init = () => {

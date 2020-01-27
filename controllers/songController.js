@@ -111,6 +111,15 @@ exports.request = async function(req, res) {
     }
 };
 
+/**
+ * songRequest
+ * Inputs:
+ * - name: (string) Name of the music
+ * - applysufix: (bool) Apply lyrics suffix to avoid video musics with history
+ * - index: (int) Number of the index of the search that has to be downloaded
+ * - force: (bool) Force to check if the song is the same of the DB
+ * - list: (bool) Return the result array of the search
+ */
 exports.songRequest = async function (request) {
     let { name, applysufix, index, force, list } = request;
 
