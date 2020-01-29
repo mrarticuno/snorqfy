@@ -104,3 +104,7 @@ dist
 .tern-port
 
 .idea/
+
+*.mp3
+
+*.db

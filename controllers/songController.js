@@ -60,7 +60,7 @@ exports.delete = async function(req, res) {
                 song.downloaded = false;
                 await song.save();
             }
-            fs.unlink(`./musics/${code}.mp3`)
+            await fs.unlinkSync(`./musics/${code}.mp3`)
         } else {
             throw new Error('Song not found.');
         }
@@ -136,23 +136,32 @@ exports.songRequest = async function (request) {
     }
 
     const craw = util.promisify(crawler);
+
     if (applysufix) {
-        name = `${name} lyrics`;
+        name = `${name} oficial`;
     }
+    
     let result = await craw(name.replace(/[^\x00-\x7F]/g, ""));
 
-    if (result.length > 0) {
-        if (list) {
-            res.status(200).json(result);
-            return;
+    if (!result) {
+        result = await craw(name);
+        if (result && result.length > 0) {
+            await module.exports.processSong(result, index, list);
         }
-        else if (index && result[index]) {
-            result = result[index];
-        } else {
-            result = result[0];
-        }
+    } else if (result.length > 0) {
+        await module.exports.processSong(result, index, list);
+    }
+}
+
+exports.processSong = async function (result, index, list) {
+    if (list) {
+        res.status(200).json(result);
+        return;
+    }
+    else if (index && result[index]) {
+        result = result[index];
     } else {
-        throw new Error(`Index not found ${name}. SE-1`);
+        result = result[0];
     }
 
     let checkMusicInDB = await new Song().find({

@@ -13,4 +13,9 @@ app.use('/', routes);
 app.use('/song', songRoutes);
 app.use('/playlist', playlistRoutes);
 
-app.listen(port, () => console.log(`Listen server ${port}!`))
+app.listen(port, () => console.log(`Listen server ${port}!`));
+
+// Resume Download queue
+
+const DC = require('./controllers/downloadController');
+DC.start_queue();

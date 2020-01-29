@@ -26,7 +26,7 @@ exports.request = async function(req, res) {
     if (!spotify) {
         let youtube = new Youtube({
             url: link,
-            fast: true
+            fast: false
         });
         scrappedPlaylist = await youtube.scrap();
     } else {

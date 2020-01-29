@@ -38,13 +38,22 @@ exports.process_queue = async function() {
 /**
  * download_song: Download a song from the link and put on the output folder
  */
-exports.download_song = async function(link, output) {
+exports.download_song = async function(link, output, retry) {
     const command = util.promisify(exec);
     console.log(link, output);
     try {
         await command(`ytdl ${link} | ffmpeg -i pipe:0 -b:a 192K -vn "musics/${output}.mp3"`);
     } catch (e) {
-        console.log(`Error during download of ${output}`);
-        console.log(e);
+        if (!retry) {
+            console.log(`Error during download of ${output} trying auto-remediation.`);
+            fs.unlink(`musics/${output}.mp3`, (err) => {
+                if (err) throw err;
+                console.log(`musics/${output}.mp3 was deleted`);
+              });
+            await module.exports.download_song(link, output, true);
+        } else {
+            console.log(`Error during download of ${output} auto-remediation failed.`);
+            console.log(e);
+        }
     }
 };
