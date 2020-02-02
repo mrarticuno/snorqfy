@@ -39,20 +39,29 @@ exports.request = async function(req, res) {
         url: link
     });
     if (scrappedPlaylist.length > 0) {
-        scrappedPlaylist = scrappedPlaylist.filter(x => !x.name.includes('Deleted video') || !x.name.includes('Private video'))
-        const promises = scrappedPlaylist.map(async (item, idx) => {
-            playlist.songs.push(item.id);
-            try {
-                await songController.songRequest({
-                    name: item.name
-                }, res);
-            } catch(ex) {
-                console.log(ex);
-                console.error(`Failed to request song: ${item.name}`)
-            }
-        });
+        scrappedPlaylist = scrappedPlaylist.filter(x => !x.name.includes('Deleted video') || !x.name.includes('Private video'));
+        if (spotify) {
+            const promises = scrappedPlaylist.map(async (item, idx) => {
+                playlist.songs.push(item.id);
+                try {
+                    await songController.songRequest({
+                        name: item.name
+                    }, res);
+                } catch(ex) {
+                    console.log(ex);
+                    console.error(`Failed to request song: ${item.name}`)
+                }
+            });
 
-        await Promise.all(promises);
+            await Promise.all(promises);
+        } else {
+            scrappedPlaylist.forEach(item => {
+                playlist.songs.push(item.id);
+            });
+            await songController.playlistRequest({
+                list: scrappedPlaylist
+            }, res);
+        }
         await playlist.save();
     } else {
         throw new Error('Failed to scrap videos from the playlist.');

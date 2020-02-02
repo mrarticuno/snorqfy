@@ -22,7 +22,7 @@
     "pouchdb-find": "^7.1.1",
     "pouchdb-node": "^7.1.1",
     "uuid": "^3.3.3",
-    "you-lister": "^2.0.3",
+    "you-lister": "^2.1.0",
     "youtube-crawler": "0.0.3"
   },
   "devDependencies": {

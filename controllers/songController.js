@@ -151,7 +151,26 @@ exports.songRequest = async function (request) {
     } else if (result.length > 0) {
         await module.exports.processSong(result, index, list);
     }
-}
+};
+
+/**
+ * playlistRequest
+ * Inputs:
+ * - list: (array) Array of links that must be downloaded
+ * - force: (boolean) Boolean that force to re-download all the playlist
+ */
+exports.playlistRequest = async function (request) {
+    let { list } = request;
+
+    if (list && list.length > 0) {
+        list.forEach(item => {
+            new Song({
+                url: item.url,
+                title: item.name
+            }).save();
+        });
+    }
+};
 
 exports.processSong = async function (result, index, list) {
     if (list) {
@@ -171,11 +190,10 @@ exports.processSong = async function (result, index, list) {
     });
 
     if (checkMusicInDB && checkMusicInDB.length > 0) {
-        return;
     } else {
         await new Song({
             url: result.link,
             title: result.title
         }).save();
     }
-}
+};
