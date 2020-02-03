@@ -172,6 +172,10 @@ exports.playlistRequest = async function (request) {
     }
 };
 
+/**
+ * processSong
+ * Get the scrapped song and check if is already downloaded else put on the download queue
+ */
 exports.processSong = async function (result, index, list) {
     if (list) {
         res.status(200).json(result);

@@ -105,6 +105,8 @@ dist
 
 .idea/
 
+.DS_Store
+
 *.mp3
 
 *.db

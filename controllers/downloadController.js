@@ -3,6 +3,12 @@ const util = require('util');
 let Song = require('../models/song');
 const exec = util.promisify(require('child_process').exec);
 let QUEUE = [];
+let broken = [
+    'The uploader has not made this video available in your country.',
+    'The uploader has not made this video available',
+    'This video contains content from SME, who has blocked it in your country on copyright grounds.',
+    'This video contains content from UMG, who has blocked it in your country on copyright grounds.'
+]
 
 exports.index = function(req, res) {
     res.send('QUEUE START');
@@ -32,6 +38,9 @@ exports.process_queue = async function() {
         element.downloaded = true;
         new Song(element).save();
         await module.exports.process_queue();
+    } else {
+        const MC = require('../controllers/monitorController');
+        MC.start_monitor();
     }
 };
 
@@ -44,11 +53,20 @@ exports.download_song = async function(link, output, retry) {
     try {
         await command(`ytdl ${link} | ffmpeg -i pipe:0 -b:a 192K -vn "musics/${output}.mp3"`);
     } catch (e) {
+        broken.forEach(item => {
+            if (e.message.includes(item)){
+                console.debug('Video Unavailable.')
+                return;
+            }
+        });
         if (!retry) {
             console.log(`Error during download of ${output} trying auto-remediation.`);
             fs.unlink(`musics/${output}.mp3`, (err) => {
-                if (err) throw err;
-                console.log(`musics/${output}.mp3 was deleted`);
+                if (err) {
+                    console.log('File do not exists, Auto-Remediation failed.')
+                }else {
+                    console.log(`musics/${output}.mp3 was deleted`);
+                }
               });
             await module.exports.download_song(link, output, true);
         } else {
