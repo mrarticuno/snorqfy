@@ -5,14 +5,14 @@ const router = express.Router();
 const songController = require('../controllers/songController');
 
 /**
- * Index
- */
-router.get('/', songController.index);
-
-/**
  * List all available songs
  */
-router.get('/list', songController.list);
+router.get('/list/:search', songController.list);
+
+/**
+ * List filesystem songs
+ */
+router.get('/listfiles/', songController.listFiles);
 
 /**
  * Search Song
@@ -25,14 +25,8 @@ router.get('/search/:search', songController.search);
 router.post('/request', songController.request);
 
 /**
- * Listen song
- */
-// router.get('/listen/:song', songController.listen);
-
-/**
  * Remove song
  */
-// router.delete('/remove', songController.delete);
-
+router.delete('/remove', songController.delete);
 
 module.exports = router;

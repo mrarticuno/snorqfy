@@ -3,6 +3,12 @@ const util = require('util');
 let Song = require('../models/song');
 const exec = util.promisify(require('child_process').exec);
 let QUEUE = [];
+let broken = [
+    'The uploader has not made this video available in your country.',
+    'The uploader has not made this video available',
+    'This video contains content from SME, who has blocked it in your country on copyright grounds.',
+    'This video contains content from UMG, who has blocked it in your country on copyright grounds.'
+]
 
 exports.index = function(req, res) {
     res.send('QUEUE START');
@@ -11,16 +17,14 @@ exports.index = function(req, res) {
 
 /**
  * start_queue: Start the main function to download the songs on the queue
- * 
  */
 exports.start_queue = async function(req, res) {
-    let queue = await new Song().find({
+    QUEUE = await new Song().find({
         selector: {
-            'downloaded': { $eq: false }
-          }
+            'downloaded': {$eq: false}
+        }
     });
-    QUEUE = queue;
-    module.exports.process_queue();
+    await module.exports.process_queue();
 };
 
 /**
@@ -29,61 +33,45 @@ exports.start_queue = async function(req, res) {
 exports.process_queue = async function() {
     if (QUEUE.length > 0) {
         let element = QUEUE.pop();
-        console.log(`Proccessing element #${QUEUE.length} - ${element.title}`)
+        console.log(`Processing element #${QUEUE.length} - ${element.title}`)
         await module.exports.download_song(element.url, element.code);
         element.downloaded = true;
-        // new Song(element).save();
-        module.exports.process_queue();
+        new Song(element).save();
+        await module.exports.process_queue();
+    } else {
+        const MC = require('../controllers/monitorController');
+        MC.start_monitor();
     }
 };
 
 /**
  * download_song: Download a song from the link and put on the output folder
  */
-exports.download_song = async function(link, output) {
+exports.download_song = async function(link, output, retry) {
     const command = util.promisify(exec);
+    console.log(link, output);
     try {
-        if (fs.existsSync(output)) {
-          return true;
-        }
-      } catch(err) {
-      }
-    try {
-        await command(`ytdl ${link} | ffmpeg -i pipe:0 -b:a 192K -vn "${output}.mp3"`);
+        await command(`ytdl ${link} | ffmpeg -i pipe:0 -b:a 192K -vn "musics/${output}.mp3"`);
     } catch (e) {
-        console.log(`Error during download of ${output}`);
-        console.log(e);
-        return false;
+        broken.forEach(item => {
+            if (e.message.includes(item)){
+                console.debug('Video Unavailable.')
+                return;
+            }
+        });
+        if (!retry) {
+            console.log(`Error during download of ${output} trying auto-remediation.`);
+            fs.unlink(`musics/${output}.mp3`, (err) => {
+                if (err) {
+                    console.log('File do not exists, Auto-Remediation failed.')
+                }else {
+                    console.log(`musics/${output}.mp3 was deleted`);
+                }
+              });
+            await module.exports.download_song(link, output, true);
+        } else {
+            console.log(`Error during download of ${output} auto-remediation failed.`);
+            console.log(e);
+        }
     }
-    return true;
-};
-
-// Display book create form on GET.
-exports.book_create_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book create GET');
-};
-
-// Handle book create on POST.
-exports.book_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book create POST');
-};
-
-// Display book delete form on GET.
-exports.book_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book delete GET');
-};
-
-// Handle book delete on POST.
-exports.book_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book delete POST');
-};
-
-// Display book update form on GET.
-exports.book_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update GET');
-};
-
-// Handle book update on POST.
-exports.book_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update POST');
 };

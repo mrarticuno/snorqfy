@@ -1,43 +1,66 @@
-exports.index = function(req, res) {
-    res.send('NOT IMPLEMENTED: Site Home Page');
+const util = require('util');
+const fs = require('fs');
+/**
+ * Stream song from key provided
+ */
+exports.play_song = function(req, res) {
+    let { key } = req.params;
+    let file = 'musics/' + key + '.mp3';
+
+    try {
+        const stat = fs.statSync(file);
+        const total = stat.size;
+        fs.exists(file, (exists) => {
+            if (exists) {
+                let range = req.headers.range;
+                if (!range) {
+                    range = `bytes=0-`
+                }
+                const parts = range.replace(/bytes=/, '').split('-');
+                const partialStart = parts[0];
+                const partialEnd = parts[1];
+
+                const start = parseInt(partialStart, 10);
+                const end = partialEnd ? parseInt(partialEnd, 10) : total - 1;
+                const chunksize = (end - start) + 1;
+                const rstream = fs.createReadStream(file, {start: start, end: end});
+
+                res.writeHead(206, {
+                    'Content-Range': 'bytes ' + start + '-' + end + '/' + total,
+                    'Accept-Ranges': 'bytes', 'Content-Length': chunksize,
+                    'Content-Type': 'audio/mpeg'
+                });
+                rstream.pipe(res);
+
+            } else {
+                res.send('Error - 404');
+                res.end();
+                // res.writeHead(200, { 'Content-Length': total, 'Content-Type': 'audio/mpeg' });
+                // fs.createReadStream(path).pipe(res);
+            }
+        });
+    } catch (error) {
+        console.log(error);
+        res.send('Song not found.');
+    }
 };
 
-// Display list of all books.
-exports.book_list = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book list');
+exports.play_playlist = function(req, res) {
+    res.send('NOT IMPLEMENTED: PLAY SONG');
 };
 
-// Display detail page for a specific book.
-exports.book_detail = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book detail: ' + req.params.id);
+exports.skip_song = function(req, res) {
+    res.send('NOT IMPLEMENTED: PLAY NEXT SONG');
 };
 
-// Display book create form on GET.
-exports.book_create_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book create GET');
+exports.last_song = function(req, res) {
+    res.send('NOT IMPLEMENTED: PLAY LAST SONG');
 };
 
-// Handle book create on POST.
-exports.book_create_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book create POST');
+exports.downvote_song = function(req, res) {
+    res.send('NOT IMPLEMENTED: DOWNVOTE SONG');
 };
 
-// Display book delete form on GET.
-exports.book_delete_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book delete GET');
-};
-
-// Handle book delete on POST.
-exports.book_delete_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book delete POST');
-};
-
-// Display book update form on GET.
-exports.book_update_get = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update GET');
-};
-
-// Handle book update on POST.
-exports.book_update_post = function(req, res) {
-    res.send('NOT IMPLEMENTED: Book update POST');
+exports.upvote_song = function(req, res) {
+    res.send('NOT IMPLEMENTED: UPVOTE SONG');
 };

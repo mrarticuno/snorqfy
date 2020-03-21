@@ -7,13 +7,15 @@
     "start": "pm2 start server.js --watch --ignore-watch='node_modules' -i max",
     "startd": "pm2 start server.js --watch --ignore-watch='node_modules' -i max && pm2 plus",
     "startm": "pm2 start server.js --watch --ignore-watch='node_modules' -i max && pm2 monit",
-    "stop": "pm2 stop all"
+    "stop": "pm2 stop all",
+    "dev": "nodemon server.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "pm2": "^4.2.0",
     "pouchdb": "^7.1.1",
@@ -21,7 +23,7 @@
     "pouchdb-find": "^7.1.1",
     "pouchdb-node": "^7.1.1",
     "uuid": "^3.3.3",
-    "you-lister": "^2.0.0",
+    "you-lister": "^2.1.1",
     "youtube-crawler": "0.0.3"
   },
   "devDependencies": {
