@@ -15,6 +15,7 @@
   "license": "ISC",
   "dependencies": {
     "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "pm2": "^4.2.0",
     "pouchdb": "^7.1.1",
@@ -22,7 +23,7 @@
     "pouchdb-find": "^7.1.1",
     "pouchdb-node": "^7.1.1",
     "uuid": "^3.3.3",
-    "you-lister": "file:../you-lister",
+    "you-lister": "^2.1.1",
     "youtube-crawler": "0.0.3"
   },
   "devDependencies": {

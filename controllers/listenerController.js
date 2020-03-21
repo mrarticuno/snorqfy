@@ -1,3 +1,5 @@
+const util = require('util');
+const fs = require('fs');
 /**
  * Stream song from key provided
  */
@@ -10,7 +12,10 @@ exports.play_song = function(req, res) {
         const total = stat.size;
         fs.exists(file, (exists) => {
             if (exists) {
-                const range = req.headers.range;
+                let range = req.headers.range;
+                if (!range) {
+                    range = `bytes=0-`
+                }
                 const parts = range.replace(/bytes=/, '').split('-');
                 const partialStart = parts[0];
                 const partialEnd = parts[1];

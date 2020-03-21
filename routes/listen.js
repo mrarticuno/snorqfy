@@ -7,7 +7,7 @@ const listenerController = require('../controllers/listenerController');
 /**
  * Listen to a key song
  */
-router.get('/listen/:key', listenerController.listen);
+router.get('/:key', listenerController.play_song);
 
 
 module.exports = router;
